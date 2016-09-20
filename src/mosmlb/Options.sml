@@ -37,6 +37,14 @@ structure Options = struct
             Log.fatal "Invalid debug level." 
         )
 
+    fun readEnvironmentVars _ =
+        Mlb.pathVariables :=
+            map (fn (variable, value) =>
+                    case OS.Process.getEnv variable of
+                      SOME value => (variable, value)
+                    | NONE => (variable, value)
+                ) (!Mlb.pathVariables)
+
     fun readCommandLine _ =
         let
             fun printUsage _ = 

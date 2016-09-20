@@ -42,7 +42,7 @@ datatype basDec = Basis of basBind list | Local of (basDec list)*(basDec list)
  *)
 val pathVariables = ref
     [("SML_LIB","/sml-lib-location"),
-     ("HOME_PATH","/home"), (* for automated testing, remove in future *)
+     ("HOME","/home"), (* for automated testing, remove in future *)
      ("TARGET_ARCH", "bytecode"),
      ("TARGET_OS", "linux"),
      ("DEFAULT_INT", "int32"),
