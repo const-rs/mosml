@@ -196,7 +196,7 @@ fun loadMlbFileTree file =
                 ((Mlb.LoadedMLBFile (loadSingleMLBFile file)), file)
                 handle OS.SysErr _ => 
                 (
-                    Log.error (Log.FileNotRead file);
+                    Log.error (Log.FileNotRead (file, tl (rev (tl (!pathStack)))));
                     ((Mlb.FailedMLBFile Mlb.ReadFailure), file)
                 )
                   | Parsing.ParseError _ =>

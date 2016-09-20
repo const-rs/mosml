@@ -14,7 +14,7 @@ structure Log = struct
 
     datatype errorMessage = 
         MLBGraphCycle of string * string list
-      | FileNotRead of string
+      | FileNotRead of string * string list
       | UnexpectedCommentEnd of location
       | ParseError of string
 
@@ -29,7 +29,9 @@ structure Log = struct
     fun errorDescription (MLBGraphCycle (file, includeStack)) = 
         (1, "Cycle in mlb includes: " ^ file ^
             (foldl (fn (f, str) => ("\n  is included from " ^ f ^ str)) "" includeStack))
-      | errorDescription (FileNotRead filename)  = (2, ("File '" ^ filename ^ "' can not be loaded"))
+      | errorDescription (FileNotRead (filename, includeStack)) = 
+        (2, ("Can not load '" ^ filename ^ "' " ^ 
+            (foldl (fn (f, str) => ("\n  included from " ^ f ^ str)) "" includeStack)))
       | errorDescription (ParseError filename)  = (3, ("File '" ^ filename ^ "' can not be parsed"))
       | errorDescription (UnexpectedCommentEnd (file, (line, _), _)) = 
         (4, ("Unexpected commend end in " ^ file ^ " at line " ^ (Int.toString line)))
