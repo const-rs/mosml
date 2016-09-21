@@ -1,6 +1,6 @@
 (** Options and their loading code. NOTE: options, that affect logging
  *  are declared in Log stucture (failEarly and debug). *)
-structure Options = struct
+structure Options :> Options = struct
     open Arg
 
     (* Global options of the program *)
@@ -52,6 +52,7 @@ structure Options = struct
                 print
                 "usage: mosmlb [options] file.mlb\n\
                  \Options:\n\
+                 \  -D<pathVar> <value>  Define pathVar=value (overrides environment)\n\
                  \  -debug (1|2|3|print) Set debug level to certain level or print final Mlb tree\n\
                  \  -always-make         Rebuild all targets\n\
                  \  -keep-going          Continue as much as possible after an error\n\
@@ -95,4 +96,10 @@ structure Options = struct
             )
             | _ => ()
         end
+
+    fun init _ =
+    (
+        readEnvironmentVars ();
+        readCommandLine ()
+    )
 end

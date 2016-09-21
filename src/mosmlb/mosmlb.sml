@@ -89,8 +89,7 @@ fun parsePrintParseTest initialAST =
 
 fun main () =
     let 
-        val _ = Options.readEnvironmentVars ()
-        val _ = Options.readCommandLine ()
+        val _ = Options.init ()
         val file = Option.valOf (!Options.mlbFile)
         val parseTree = Mlb_functions.loadMlbFileTree file
     in
