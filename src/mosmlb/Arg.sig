@@ -3,12 +3,15 @@ signature Arg =
 sig
 
     datatype spec =
-	String  of (string -> unit)
+	    String  of (string -> unit)
       | Int     of (int -> unit)
       | Unit    of (unit -> unit)
       | Real    of (real -> unit)
+      | Generic of (string*string -> unit)
 
     val parse : (string * spec) list -> (string -> unit) -> unit;
+
+    val unknownKeyError : string -> unit;
 
     exception Bad of string
 
@@ -26,10 +29,14 @@ end
    
    A keyword is a character string starting with a [-].  An option is
    a keyword alone or followed by an argument.  There are 4 types of
-   keywords: Unit, String, Int, and Float.  Unit keywords do not take
-   an argument.  String, Int, and Float keywords take the following
-   word on the command line as an argument.  Arguments not preceded by
-   a keyword are called anonymous arguments.
+   keywords: Unit, String, Int, Float and Generic. Unit keywords do 
+   not take an argument. String, Int, and Float keywords take the following
+   word on the command line as an argument. Arguments not preceded by
+   a keyword are called anonymous arguments. Generic keywords handle
+   all keywords with - prefix which were not included in the list
+   (the string in speclist should be empty - ("", Generic handler)).
+   If Generic function is not provided, the standard error handler is 
+   executed.
 
    Examples ([foo] is assumed to be the command name):
 
@@ -53,4 +60,7 @@ end
    in [speclist]. Functions in [speclist] or [anonfun] can raise [Bad
    message] to reject invalid arguments.
 
+   [unknownKeyError] throws Bad exception with error message about
+   undefined keyword (default behavour of parse if no Generic function
+   is provided and it met undefined keyword).
 *)

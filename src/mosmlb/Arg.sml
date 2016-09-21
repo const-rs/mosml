@@ -20,12 +20,20 @@ datatype spec =
   | Int     of (int -> unit)
   | Unit    of (unit -> unit)
   | Real    of (real -> unit)
+  | Generic of (string*string -> unit)
 
 datatype error =
     Unknown of string
   | Wrong of string * string * string  (* option, actual, expected *)
   | Missing of string
   | Message of string
+
+fun unknownKeyError key =
+  let val progname = CommandLine.name()
+      val message = progname ^ ": unknown option: \"" ^ key ^ "\"."
+  in
+     raise Bad (message)
+  end
 
 fun stop error =
   let val progname = CommandLine.name()
@@ -49,7 +57,10 @@ fun lookup k [] = raise Subscript
     if k = a then v else lookup k xs
 
 fun parse speclist anonfun =
-  let fun p [] = ()
+  let 
+      val genericF =
+        (case lookup "" speclist of Generic f => SOME f | _ => NONE) handle Subscript => NONE
+      fun p [] = ()
         | p (s::t) =
             if size s >= 1 andalso CharVector.sub(s, 0) = #"-"
             then do_key s t
@@ -58,25 +69,27 @@ fun parse speclist anonfun =
       and do_key s l =
         let val action =
               lookup s speclist
-                handle Subscript => stop (Unknown s)
+                handle Subscript => 
+                    case genericF of
+                      SOME f => Generic f
+                    | NONE => stop (Unknown s)
         in
           (case (action, l) of
                (Unit f, l) => (f (); p l)
              | (String f, arg::t) => (f arg; p t)
              | (Int f, arg::t) =>
                  let val arg_i =
-                       case Int.fromString arg of
-			   SOME i => i
-                       |   NONE =>
-                             stop (Wrong (s, arg, "an integer"))
+                    case Int.fromString arg of
+			          SOME i => i
+                    | NONE => stop (Wrong (s, arg, "an integer"))
                  in f arg_i; p t end
              | (Real f, arg::t) =>
                  let val arg_r =
-                       case Real.fromString arg of
-			   SOME r => r
-                       |   NONE =>
-                             stop (Wrong (s, arg, "a real"))
+                    case Real.fromString arg of
+			          SOME r => r
+                    | NONE => stop (Wrong (s, arg, "a real"))
                  in f arg_r; p t end
+             | (Generic f, value::t) => (f (s, value); p t)
              | (_, []) => stop (Missing s)
           ) handle Bad m => stop (Message m)
         end
