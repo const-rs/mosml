@@ -15,6 +15,7 @@ structure Log = struct
     datatype errorMessage = 
         MLBGraphCycle of string * string list
       | FileNotRead of string * string list
+      | UnknownPathVariable of string * string * string list
       | UnexpectedCommentEnd of location
       | ParseError of string
 
@@ -32,9 +33,12 @@ structure Log = struct
       | errorDescription (FileNotRead (filename, includeStack)) = 
         (2, ("Can not load '" ^ filename ^ "' " ^ 
             (foldl (fn (f, str) => ("\n  included from " ^ f ^ str)) "" includeStack)))
-      | errorDescription (ParseError filename)  = (3, ("File '" ^ filename ^ "' can not be parsed"))
+      | errorDescription (UnknownPathVariable (pathVariable, filename, includeStack)) = 
+        (3, ("Unknown path variable '" ^ pathVariable ^ "' in " ^ filename ^
+            (foldl (fn (f, str) => ("\n  included from " ^ f ^ str)) "" includeStack)))
+      | errorDescription (ParseError filename)  = (4, ("File '" ^ filename ^ "' can not be parsed"))
       | errorDescription (UnexpectedCommentEnd (file, (line, _), _)) = 
-        (4, ("Unexpected commend end in " ^ file ^ " at line " ^ (Int.toString line)))
+        (5, ("Unexpected commend end in " ^ file ^ " at line " ^ (Int.toString line)))
 
     (* Debug modes of the program:
      * Level - set debug level, which enables Log.debug with lower level.

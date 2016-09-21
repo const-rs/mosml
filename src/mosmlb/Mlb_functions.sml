@@ -199,9 +199,14 @@ fun loadMlbFileTree file =
                     Log.error (Log.FileNotRead (file, tl (rev (tl (!pathStack)))));
                     ((Mlb.FailedMLBFile Mlb.ReadFailure), file)
                 )
-                  | Parsing.ParseError _ =>
+                | Parsing.ParseError _ =>
                 (
                     Log.error (Log.ParseError file);
+                    ((Mlb.FailedMLBFile Mlb.ReadFailure), file)
+                )
+                | Scanner.UnknownPathVariable pathVariable =>
+                (
+                    Log.error (Log.UnknownPathVariable (pathVariable, file, tl (rev (tl (!pathStack)))));
                     ((Mlb.FailedMLBFile Mlb.ReadFailure), file)
                 )
             )

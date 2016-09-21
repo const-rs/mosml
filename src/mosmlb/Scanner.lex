@@ -3,6 +3,8 @@
 
 open Parser
 
+exception UnknownPathVariable of string
+
 (* For calculating position ala ocamllex - filename, line number and
    current position in stream of the start of the current line. *)
 val fileName = ref ""
@@ -130,7 +132,8 @@ fun substitutePathVars path =
             case searchForPathVar suffix  of
               NONE => prefix ^ suffix
             | SOME (variable, pre, suffix) =>
-                iter (prefix ^ pre ^ (Mlb.pathVariable variable)) suffix
+                iter (prefix ^ pre ^ (Mlb.pathVariable variable)) suffix 
+                    handle Fail _ => raise (UnknownPathVariable variable)
     in
         iter "" path
     end
