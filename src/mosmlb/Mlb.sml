@@ -49,6 +49,20 @@ val pathVariables = ref
      ("DEFAULT_WORD", "word32"),
      ("DEFAULT_REAL", "real64")]
 
+(* Sets path variable to value. If path variable is not
+ * yet defined, adds it. *)
+fun setPathVariable variable value =
+    case List.find (fn (a,_) => a = variable) (!pathVariables) of
+      SOME _ => pathVariables :=
+            map 
+                (fn (variable', value') => 
+                    if variable' <> variable then
+                        (variable', value')
+                    else
+                        (variable, value)
+                ) (!pathVariables)
+    | NONE => pathVariables := (variable, value)::(!pathVariables)
+
 (* Returns the value of path variable by its name.
  * Currently works only with hardcoded predefined 
  * path variables. *)

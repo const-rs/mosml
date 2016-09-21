@@ -66,6 +66,16 @@ structure Options = struct
             fun assignTrue r () = r := true
             fun assignFalse r () = r := false
             fun assignOption r v = r := SOME v
+
+            (** Handles keys -DpathVar path adding or redefining paths in
+             *  path variables table. *)
+            fun definePathVariable (key, value) =
+                if size key >= 3 andalso CharVector.sub(key, 1) = #"D" then
+                    Mlb.setPathVariable
+                        (CharVectorSlice.vector (CharVectorSlice.slice(key, 2, NONE)))
+                        value
+                else
+                    Arg.unknownKeyError key
         in
             Arg.parse 
                [("-debug", Arg.String setDebugLevel)
@@ -75,6 +85,7 @@ structure Options = struct
                ,("-version",    Arg.Unit printVersion)
                ,("-help",       Arg.Unit printUsage)
                ,("-o",          Arg.String (assignOption execFile))
+               ,("",            Arg.Generic definePathVariable)
                ] (assignOption mlbFile);
             case !mlbFile of
               NONE =>
