@@ -96,7 +96,7 @@ fun main () =
         case !Log.debugLevel of
           Log.PrintParseTree => Mlb_functions.printAST print parseTree
         | Log.ReadPrintReadTest => parsePrintParseTest parseTree
-        | _ => buildProject file parseTree
+        | _ => () (* buildProject file parseTree *)
     end
 
 val _ = (main() before OS.Process.exit OS.Process.success)

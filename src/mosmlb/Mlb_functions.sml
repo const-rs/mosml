@@ -161,6 +161,9 @@ fun loadMlbFileTree file =
         (* Cache for read and parsed, but not yet completely loaded mlb files. *)
         val primaryCache = ref (Binarymap.mkDict String.compare)
 
+        (* Cache for completely loaded mlb files - i.e. with includes. *)
+        val secondaryCache = ref (Binarymap.mkDict String.compare)
+
         (* makes path of loading file absolute using parent MLB from pathStack *)
         fun absolutize path =
             if Path.isAbsolute path then
@@ -251,14 +254,20 @@ fun loadMlbFileTree file =
                         )
                         | NONE => 
                         (
-                            pathStack := absolutePath::(!pathStack);
-                            let
-                                val loadedMlb = loadPath (MLBFile, absolutePath)
-                                val expandedBasDec = expandBasDec (Mlb.Path loadedMlb)
-                            in
-                                pathStack := tl (!pathStack);
-                                expandedBasDec
-                            end
+                            Binarymap.find (!secondaryCache, absolutePath) handle Not_found =>
+                            (
+                                pathStack := absolutePath::(!pathStack);
+                                let
+                                    val loadedMlb = loadPath (MLBFile, absolutePath)
+                                    val expandedBasDec = expandBasDec (Mlb.Path loadedMlb)
+                                in
+                                    pathStack := tl (!pathStack);
+                                    secondaryCache :=
+                                        Binarymap.insert ((!secondaryCache), absolutePath, expandedBasDec);
+
+                                    expandedBasDec
+                                end
+                            )
                         )
                     end
                   )
