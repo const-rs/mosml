@@ -158,6 +158,9 @@ fun loadMlbFileTree file =
         (* stack of paths currently processed .mlb files, relative to root .mlb *)
         val pathStack = ref [""] 
 
+        (* Cache for read and parsed, but not yet completely loaded mlb files. *)
+        val primaryCache = ref (Binarymap.mkDict String.compare)
+
         (* makes path of loading file absolute using parent MLB from pathStack *)
         fun absolutize path =
             if Path.isAbsolute path then
@@ -193,7 +196,13 @@ fun loadMlbFileTree file =
         fun loadPath (Mlb.MLBFile, file) = 
             (
                 Log.debug 1 ("Included " ^ file);
-                ((Mlb.LoadedMLBFile (loadSingleMLBFile file)), file)
+                Binarymap.find (!primaryCache, file) handle Not_found =>
+                let
+                    val loadedMlb = (Mlb.LoadedMLBFile (loadSingleMLBFile file), file)
+                in
+                    primaryCache := Binarymap.insert ((!primaryCache), file, loadedMlb);
+                    loadedMlb
+                end
                 handle OS.SysErr _ => 
                 (
                     Log.error (Log.FileNotRead (file, tl (rev (tl (!pathStack)))));
