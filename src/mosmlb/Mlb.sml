@@ -32,7 +32,7 @@ datatype basDec = Basis of basBind list | Local of (basDec list)*(basDec list)
      * MLBFile - not yet loaded .mlb, LoadedMLBFile - parse tree of successfully
      * loaded file, FailedMLBFile - why failed loading of the file.
      *)
-    and includedFileType = UnknownFile | MLBFile | LoadedMLBFile of basDec list
+    and includedFileType = UnknownFile | MLBFile | LoadedMLBFile of basDec list ref
       | FailedMLBFile of fileError | SIGFile | SMLFile | FUNFile
 
 (* Currently (6 sept 2016) MLton, SMLNJ, MLkit use only SML_LIB and

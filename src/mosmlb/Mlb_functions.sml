@@ -116,7 +116,7 @@ fun printAST print basDecs =
           | printBasDec indent (Functor binds) = printFunctor indent binds
           | printBasDec indent (Path (FailedMLBFile _, _)) = ()
           | printBasDec indent (Path (LoadedMLBFile basDecList, _)) =
-            app (printBasDec indent) basDecList
+            app (printBasDec indent) (!basDecList)
           | printBasDec indent (Path path) = printPath indent path
           | printBasDec indent (Annotation annotations) = printAnnotation indent annotations
     in
@@ -197,7 +197,7 @@ fun loadMlbFileTree file =
         fun loadPath (Mlb.MLBFile, file) = 
             (
                 Log.debug 1 ("Included " ^ file);
-                (Mlb.LoadedMLBFile (loadSingleMLBFile file), file)
+                (Mlb.LoadedMLBFile (ref (loadSingleMLBFile file)), file)
                 handle OS.SysErr _ => 
                 (
                     Log.error (Log.FileNotRead (file, tl (rev (tl (!pathStack)))));
@@ -264,7 +264,7 @@ fun loadMlbFileTree file =
                     end
                   )
                   | expandBasDec (Mlb.Path ((Mlb.LoadedMLBFile basDecList), path)) = 
-                        (Mlb.Path ((Mlb.LoadedMLBFile (map expandBasDec basDecList)), path))
+                        (Mlb.Path ((Mlb.LoadedMLBFile (ref (map expandBasDec (!basDecList)))), path))
                   | expandBasDec (Mlb.Path nonMlbPath) = (Mlb.Path nonMlbPath)
                   | expandBasDec (Mlb.Annotation (annList, basDecList)) =
                         Mlb.Annotation (annList, map expandBasDec basDecList)

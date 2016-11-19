@@ -91,7 +91,7 @@ fun main () =
     let 
         val _ = Options.init ()
         val file = Option.valOf (!Options.mlbFile)
-        val parseTree = Mlb_functions.loadMlbFileTree file
+        val parseTree = !(Mlb_functions.loadMlbFileTree file)
     in
         case !Log.debugLevel of
           Log.PrintParseTree => Mlb_functions.printAST print parseTree
